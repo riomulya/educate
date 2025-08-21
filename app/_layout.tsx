@@ -1,6 +1,5 @@
 import { Fragment, useState, useEffect } from 'react';
 import * as SplashScreen from 'expo-splash-screen';
-import BottomSheetContents from '@/components/layouts/BottomSheetContents';
 import BottomSheet from '@/components/elements/BottomSheet';
 import useColorScheme from '@/hooks/useColorScheme';
 import { loadImages, loadFonts, colors } from '@/theme';
@@ -48,12 +47,6 @@ function Router() {
     <Fragment>
       <Slot />
       <StatusBar style="light" />
-      <BottomSheet
-        isOpen={isOpen}
-        initialOpen
-        backgroundStyle={isDark ? { backgroundColor: colors.blackGray } : undefined}>
-        <BottomSheetContents onClose={() => setOpen(false)} />
-      </BottomSheet>
     </Fragment>
   );
 }

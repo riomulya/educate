@@ -60,10 +60,20 @@ export class AuthService {
    */
   static async signInWithOAuth(provider: AuthProvider) {
     try {
+      // For Expo development - adjust URL based on your setup
+      const redirectUrl = __DEV__
+        ? 'exp://192.168.1.100:8081/--/auth/callback' // Replace with your IP
+        : 'educate://auth/callback';
+
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider,
         options: {
-          redirectTo: 'exp://localhost:8081/--/auth/callback', // For Expo development
+          redirectTo: redirectUrl,
+          queryParams: {
+            access_type: 'offline',
+            prompt: 'select_account', // This will show Google account picker
+            include_granted_scopes: 'true',
+          },
         },
       });
 

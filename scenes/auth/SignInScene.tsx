@@ -18,13 +18,15 @@ import { colors } from '@/theme/colors';
 import Input from '@/components/elements/Input';
 import Button from '@/components/elements/Button';
 import SocialButton from '@/components/elements/SocialButton';
-import { signIn, signInWithOAuth, clearError } from '@/slices/authSlice';
+import { signIn, clearError } from '@/slices/authSlice';
 import { RootState, AppDispatch } from '@/utils/store';
 import { SignInCredentials } from '@/types/auth';
+import { useExpoGoogleAuth } from '@/hooks/useExpoGoogleAuth';
 
 export default function SignInScene() {
   const dispatch = useDispatch<AppDispatch>();
   const { loading, error } = useSelector((state: RootState) => state.auth);
+  const { signInWithGoogle, loading: googleLoading } = useExpoGoogleAuth();
 
   const [formData, setFormData] = useState<SignInCredentials>({
     email: '',
@@ -65,14 +67,15 @@ export default function SignInScene() {
     }
   };
 
-  const handleOAuthSignIn = async (provider: 'google' | 'facebook' | 'apple') => {
+  const handleExpoGoogleSignIn = async () => {
     dispatch(clearError());
 
     try {
-      await dispatch(signInWithOAuth(provider)).unwrap();
-      // OAuth redirect will be handled automatically
+      console.log('🚀 Starting Expo Google Sign-In...');
+      await signInWithGoogle();
     } catch (error) {
-      Alert.alert('Error', `Gagal masuk dengan ${provider}`);
+      console.error('❌ Expo Google Sign-In failed:', error);
+      // Error handling is done in the hook
     }
   };
 
@@ -124,7 +127,7 @@ export default function SignInScene() {
                   stiffness: 150,
                   delay: 400,
                 }}>
-                <Ionicons name="school" size={60} color={colors.purple} />
+                <Ionicons name="school" size={40} color={colors.purple} />
               </MotiView>
             </View>
             <Text style={styles.title}>Selamat Datang Kembali!</Text>
@@ -244,8 +247,8 @@ export default function SignInScene() {
             }}>
             <SocialButton
               provider="google"
-              onPress={() => handleOAuthSignIn('google')}
-              loading={loading}
+              onPress={handleExpoGoogleSignIn}
+              loading={googleLoading}
             />
           </MotiView>
 
@@ -287,50 +290,51 @@ const styles = StyleSheet.create({
   scrollContent: {
     flexGrow: 1,
     paddingHorizontal: 24,
-    paddingTop: 40,
-    paddingBottom: 40,
+    paddingTop: 20,
+    paddingBottom: 20,
+    justifyContent: 'center',
   },
   header: {
     alignItems: 'center',
-    marginBottom: 40,
+    marginBottom: 24,
   },
   logoContainer: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
+    width: 80,
+    height: 80,
+    borderRadius: 40,
     backgroundColor: colors.white,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 24,
+    marginBottom: 16,
     shadowColor: colors.purple,
     shadowOffset: {
       width: 0,
-      height: 8,
+      height: 4,
     },
-    shadowOpacity: 0.2,
-    shadowRadius: 16,
-    elevation: 8,
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 4,
   },
   title: {
-    fontSize: 28,
+    fontSize: 24,
     fontWeight: 'bold',
     color: colors.blackGray,
     textAlign: 'center',
-    marginBottom: 12,
+    marginBottom: 8,
   },
   subtitle: {
-    fontSize: 16,
+    fontSize: 14,
     color: colors.gray,
     textAlign: 'center',
-    lineHeight: 24,
-    maxWidth: 300,
+    lineHeight: 20,
+    maxWidth: 280,
   },
   form: {
-    marginBottom: 32,
+    marginBottom: 20,
   },
   forgotPassword: {
     alignSelf: 'flex-end',
-    marginBottom: 24,
+    marginBottom: 16,
   },
   forgotPasswordText: {
     color: colors.purple,
@@ -343,7 +347,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFEBEE',
     padding: 12,
     borderRadius: 8,
-    marginBottom: 20,
+    marginBottom: 16,
   },
   errorText: {
     color: '#F44336',
@@ -357,7 +361,7 @@ const styles = StyleSheet.create({
   dividerContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginVertical: 32,
+    marginVertical: 20,
   },
   dividerLine: {
     flex: 1,
@@ -371,7 +375,7 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   socialContainer: {
-    marginBottom: 32,
+    marginBottom: 20,
   },
   signUpContainer: {
     alignItems: 'center',
