@@ -1,10 +1,10 @@
 {
   "expo": {
-    "name": "react-native-boilerplate",
-    "slug": "react-native-boilerplate",
-    "scheme": "react-native-boilerplate",
+    "name": "Educate",
+    "slug": "educate",
+    "scheme": "educate",
     "version": "3.0.0",
-    "owner": "rio",
+    "owner": "riomulya",
     "newArchEnabled": true,
     "platforms": [
       "ios",

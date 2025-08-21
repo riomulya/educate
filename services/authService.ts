@@ -9,6 +9,11 @@ import {
 } from '@/types/auth';
 import { AuthError } from '@supabase/supabase-js';
 
+// web oauth id and secret
+// 292474871516-vtgi44pradraqeo4km9r2hnbqpp4sk9g.apps.googleusercontent.com
+// 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
+// android oauth id
+// 292474871516-prppt054chsnutr515lndd1cg061k1tm.apps.googleusercontent.com
 export class AuthService {
   /**
    * Sign in with email and password

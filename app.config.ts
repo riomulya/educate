@@ -1,19 +1,18 @@
 import { ExpoConfig, ConfigContext } from 'expo/config';
 
 export default ({ config }: ConfigContext): ExpoConfig => {
-  const expoProjectId = process.env.EXPO_PROJECT_ID ?? '18adc0d0-eb1d-11e9-8009-d524ed5cc4a7';
+  const expoProjectId = process.env.EXPO_PROJECT_ID ?? '465c0494-df0c-42c2-88e7-85473aa912d9';
   const expoConfig: ExpoConfig = {
     ...config,
-    slug: process.env.EXPO_SLUG ?? 'react-native-boilerplate',
-    name: process.env.EXPO_NAME ?? 'React Native Boilerplate',
+    slug: process.env.EXPO_SLUG ?? 'educate',
+    name: process.env.EXPO_NAME ?? 'Educate',
     ios: {
       ...config.ios,
-      bundleIdentifier:
-        process.env.EXPO_IOS_BUNDLE_IDENTIFIER ?? 'com.watarumaeda.react-native-boilerplate',
+      bundleIdentifier: process.env.EXPO_IOS_BUNDLE_IDENTIFIER ?? 'com.educate.app',
     },
     android: {
       ...config.android,
-      package: process.env.EXPO_ANDROID_PACKAGE ?? 'com.watarumaeda.react_native_boilerplate',
+      package: process.env.EXPO_ANDROID_PACKAGE ?? 'com.educate.app',
     },
     web: {
       ...config.web,

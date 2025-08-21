@@ -28,6 +28,7 @@
     "@expo/vector-icons": "^14.1.0",
     "@gorhom/bottom-sheet": "^5",
     "@react-native-async-storage/async-storage": "2.1.2",
+    "@react-native-google-signin/google-signin": "^15.0.0",
     "@react-navigation/bottom-tabs": "^7.2.0",
     "@react-navigation/drawer": "^7.1.1",
     "@react-navigation/native": "^7.0.14",
@@ -38,6 +39,7 @@
     "expo-asset": "~11.1.7",
     "expo-blur": "~14.1.5",
     "expo-constants": "~17.1.7",
+    "expo-dev-client": "~5.2.4",
     "expo-font": "~13.3.2",
     "expo-haptics": "~14.1.4",
     "expo-image": "~2.4.0",
@@ -63,8 +65,7 @@
     "react-native-web": "^0.20.0",
     "react-native-webview": "13.13.5",
     "react-redux": "^9.2.0",
-    "redux-logger": "^3.0.6",
-    "expo-dev-client": "~5.2.4"
+    "redux-logger": "^3.0.6"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
