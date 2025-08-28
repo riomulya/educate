@@ -8,9 +8,14 @@ import {
   SafeAreaView,
   ActivityIndicator,
   Alert,
+  StatusBar,
+  Dimensions,
 } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { useLocalSearchParams, router } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
+import { BlurView } from 'expo-blur';
 import { colors } from '@/theme/colors';
 import { EducationService } from '@/services/educationService';
 import { markMaterialCompleted } from '@/slices/educationSlice';
@@ -128,47 +133,90 @@ export default function MaterialDetailScene() {
   }
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <TouchableOpacity style={styles.headerBackButton} onPress={() => router.back()}>
-          <Text style={styles.backIcon}>←</Text>
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Detail Materi</Text>
-        <View style={styles.headerSpacer} />
-      </View>
+    <View style={styles.container}>
+      <StatusBar barStyle="light-content" backgroundColor={colors.purple} />
+
+      <LinearGradient
+        colors={[colors.purple, colors.lightPurple]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 0.5 }}
+        style={styles.headerGradient}>
+        <SafeAreaView>
+          <View style={styles.headerContainer}>
+            <BlurView intensity={20} style={styles.backButton}>
+              <TouchableOpacity
+                style={styles.backButtonInner}
+                onPress={() => router.back()}
+                activeOpacity={0.8}>
+                <Ionicons name="arrow-back" size={24} color={colors.white} />
+              </TouchableOpacity>
+            </BlurView>
+
+            <View style={styles.headerContent}>
+              <View style={styles.materialTypeContainer}>
+                <View style={styles.typeIconContainer}>
+                  <Text style={styles.typeIconLarge}>{getTypeIcon(material.type)}</Text>
+                </View>
+                <Text style={styles.headerTitle}>{material.title}</Text>
+                <Text style={styles.headerSubtitle}>Detail Materi</Text>
+              </View>
+            </View>
+          </View>
+        </SafeAreaView>
+      </LinearGradient>
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-        <View style={styles.materialHeader}>
-          <View style={styles.typeContainer}>
-            <Text style={styles.typeIcon}>{getTypeIcon(material.type)}</Text>
-            <View
-              style={[
-                styles.difficultyBadge,
-                { backgroundColor: getDifficultyColor(material.difficulty) },
-              ]}>
-              <Text style={styles.difficultyText}>{getDifficultyText(material.difficulty)}</Text>
+        <View style={styles.materialCard}>
+          <View style={styles.materialHeader}>
+            <View style={styles.badgeContainer}>
+              <BlurView intensity={90} style={styles.difficultyBadgeContainer}>
+                <View
+                  style={[
+                    styles.difficultyBadge,
+                    { backgroundColor: getDifficultyColor(material.difficulty) },
+                  ]}>
+                  <Ionicons name="trending-up" size={14} color={colors.white} />
+                  <Text style={styles.difficultyText}>
+                    {getDifficultyText(material.difficulty)}
+                  </Text>
+                </View>
+              </BlurView>
+
+              {material.isCompleted && (
+                <BlurView intensity={90} style={styles.completedBadgeContainer}>
+                  <View style={styles.completedBadge}>
+                    <Ionicons name="checkmark-circle" size={16} color={colors.white} />
+                    <Text style={styles.completedText}>Selesai</Text>
+                  </View>
+                </BlurView>
+              )}
             </View>
           </View>
 
-          {material.isCompleted && (
-            <View style={styles.completedBadge}>
-              <Text style={styles.completedIcon}>✓</Text>
-              <Text style={styles.completedText}>Selesai</Text>
-            </View>
-          )}
-        </View>
-
-        <Text style={styles.title}>{material.title}</Text>
-        <Text style={styles.description}>{material.description}</Text>
-
-        <View style={styles.metaContainer}>
-          <View style={styles.metaItem}>
-            <Text style={styles.metaIcon}>⏱️</Text>
-            <Text style={styles.metaText}>Durasi: {material.duration} menit</Text>
+          <View style={styles.materialInfo}>
+            <Text style={styles.description}>{material.description}</Text>
           </View>
-          <View style={styles.metaItem}>
-            <Text style={styles.metaIcon}>📊</Text>
-            <Text style={styles.metaText}>Tingkat: {getDifficultyText(material.difficulty)}</Text>
+
+          <View style={styles.metaContainer}>
+            <View style={styles.metaItem}>
+              <View style={styles.metaIconContainer}>
+                <Ionicons name="time-outline" size={20} color={colors.purple} />
+              </View>
+              <View style={styles.metaTextContainer}>
+                <Text style={styles.metaLabel}>Durasi</Text>
+                <Text style={styles.metaValue}>{material.duration} menit</Text>
+              </View>
+            </View>
+
+            <View style={styles.metaItem}>
+              <View style={styles.metaIconContainer}>
+                <Ionicons name="bar-chart-outline" size={20} color={colors.purple} />
+              </View>
+              <View style={styles.metaTextContainer}>
+                <Text style={styles.metaLabel}>Tingkat</Text>
+                <Text style={styles.metaValue}>{getDifficultyText(material.difficulty)}</Text>
+              </View>
+            </View>
           </View>
         </View>
 
@@ -196,133 +244,200 @@ export default function MaterialDetailScene() {
         </View>
       </ScrollView>
 
-      {!material.isCompleted && (
-        <View style={styles.bottomContainer}>
-          <TouchableOpacity style={styles.completeButton} onPress={handleMarkCompleted}>
-            <Text style={styles.completeButtonText}>Tandai Selesai</Text>
+      {!(material?.isCompleted || isCompleted) && (
+        <BlurView intensity={95} style={styles.bottomContainer}>
+          <TouchableOpacity
+            style={styles.completeButton}
+            onPress={handleMarkCompleted}
+            activeOpacity={0.8}>
+            <LinearGradient
+              colors={[colors.purple, colors.lightPurple]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+              style={styles.completeButtonGradient}>
+              <Ionicons name="checkmark-circle-outline" size={24} color={colors.white} />
+              <Text style={styles.completeButtonText}>Tandai Selesai</Text>
+            </LinearGradient>
           </TouchableOpacity>
-        </View>
+        </BlurView>
       )}
-    </SafeAreaView>
+    </View>
   );
 }
+
+const { width: screenWidth } = Dimensions.get('window');
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.lightGrayPurple,
   },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    backgroundColor: colors.white,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.lightGrayPurple,
+  headerGradient: {
+    paddingBottom: 30,
   },
-  headerBackButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: colors.lightGrayPurple,
+  headerContainer: {
+    paddingHorizontal: 20,
+    paddingVertical: 20,
+    paddingTop: 50,
+    position: 'relative',
+  },
+  backButton: {
+    position: 'absolute',
+    top: 50,
+    left: 20,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    overflow: 'hidden',
+    zIndex: 10,
+  },
+  backButtonInner: {
+    width: '100%',
+    height: '100%',
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.15)',
   },
-  backIcon: {
-    fontSize: 18,
-    color: colors.blackGray,
-    fontWeight: 'bold',
+  headerContent: {
+    alignItems: 'center',
+    marginTop: 60,
+    paddingHorizontal: 20,
+  },
+  materialTypeContainer: {
+    alignItems: 'center',
+  },
+  typeIconContainer: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  typeIconLarge: {
+    fontSize: 36,
   },
   headerTitle: {
-    flex: 1,
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: colors.blackGray,
+    fontSize: 24,
+    fontWeight: '800',
+    color: colors.white,
     textAlign: 'center',
+    marginBottom: 8,
+    letterSpacing: 0.5,
   },
-  headerSpacer: {
-    width: 40,
+  headerSubtitle: {
+    fontSize: 16,
+    color: 'rgba(255, 255, 255, 0.8)',
+    textAlign: 'center',
+    fontWeight: '400',
   },
   content: {
     flex: 1,
+    marginTop: 20,
+  },
+  materialCard: {
+    backgroundColor: colors.white,
+    marginHorizontal: 20,
+    marginTop: -20,
+    borderRadius: 20,
+    paddingVertical: 24,
+    paddingHorizontal: 20,
+    shadowColor: colors.black,
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 6,
   },
   materialHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingTop: 20,
-    paddingBottom: 16,
+    marginBottom: 20,
   },
-  typeContainer: {
+  badgeContainer: {
     flexDirection: 'row',
-    alignItems: 'center',
+    gap: 12,
   },
-  typeIcon: {
-    fontSize: 24,
-    marginRight: 12,
+  difficultyBadgeContainer: {
+    borderRadius: 20,
+    overflow: 'hidden',
   },
   difficultyBadge: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    gap: 6,
   },
   difficultyText: {
     color: colors.white,
-    fontSize: 12,
+    fontSize: 14,
     fontWeight: '600',
+  },
+  completedBadgeContainer: {
+    borderRadius: 20,
+    overflow: 'hidden',
   },
   completedBadge: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#4CAF50',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 16,
-  },
-  completedIcon: {
-    color: colors.white,
-    fontSize: 14,
-    fontWeight: 'bold',
-    marginRight: 6,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    gap: 6,
   },
   completedText: {
     color: colors.white,
-    fontSize: 12,
+    fontSize: 14,
     fontWeight: '600',
   },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: colors.blackGray,
-    paddingHorizontal: 16,
-    marginBottom: 12,
+  materialInfo: {
+    marginBottom: 20,
   },
   description: {
     fontSize: 16,
     color: colors.gray,
     lineHeight: 24,
-    paddingHorizontal: 16,
     marginBottom: 20,
   },
   metaContainer: {
     flexDirection: 'row',
-    paddingHorizontal: 16,
-    marginBottom: 24,
+    justifyContent: 'space-between',
   },
   metaItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginRight: 24,
+    flex: 1,
+    backgroundColor: colors.lightGrayPurple,
+    padding: 16,
+    borderRadius: 12,
+    marginHorizontal: 4,
   },
-  metaIcon: {
-    fontSize: 16,
-    marginRight: 8,
+  metaIconContainer: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(129, 0, 255, 0.1)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
   },
-  metaText: {
-    fontSize: 14,
+  metaTextContainer: {
+    flex: 1,
+  },
+  metaLabel: {
+    fontSize: 12,
     color: colors.gray,
+    marginBottom: 4,
+    fontWeight: '500',
+  },
+  metaValue: {
+    fontSize: 16,
+    color: colors.blackGray,
+    fontWeight: '700',
   },
   contentContainer: {
     backgroundColor: colors.white,
@@ -374,21 +489,38 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   bottomContainer: {
-    padding: 16,
-    backgroundColor: colors.white,
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    padding: 20,
     borderTopWidth: 1,
-    borderTopColor: colors.lightGrayPurple,
+    borderTopColor: 'rgba(255, 255, 255, 0.2)',
   },
   completeButton: {
-    backgroundColor: colors.purple,
-    paddingVertical: 16,
-    borderRadius: 12,
+    borderRadius: 16,
+    overflow: 'hidden',
+    shadowColor: colors.purple,
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 6,
+  },
+  completeButtonGradient: {
+    flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 18,
+    paddingHorizontal: 24,
+    gap: 12,
   },
   completeButtonText: {
     color: colors.white,
-    fontSize: 16,
-    fontWeight: 'bold',
+    fontSize: 18,
+    fontWeight: '700',
   },
   loadingContainer: {
     flex: 1,

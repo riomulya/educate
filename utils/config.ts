@@ -10,12 +10,13 @@ const config = {
   // Google OAuth Credentials
   webOAuthId:
     (Constants.expoConfig?.extra?.webOAuthId as string) ||
-    'your-web-client-id.googleusercontent.com',
+    '292474871516-vtgi44pradraqeo4km9r2hnbqpp4sk9g.apps.googleusercontent.com',
   webOAuthSecret:
-    (Constants.expoConfig?.extra?.webOAuthSecret as string) || 'your-web-client-secret',
+    (Constants.expoConfig?.extra?.webOAuthSecret as string) ||
+    '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',
   androidOAuthId:
     (Constants.expoConfig?.extra?.androidOAuthId as string) ||
-    'your-android-client-id.googleusercontent.com',
+    '292474871516-prppt054chsnutr515lndd1cg061k1tm.apps.googleusercontent.com',
 } as const satisfies {
   env: Env;
   apiUrl: string;

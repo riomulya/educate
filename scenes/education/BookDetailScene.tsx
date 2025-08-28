@@ -8,9 +8,14 @@ import {
   SafeAreaView,
   ActivityIndicator,
   Alert,
+  StatusBar,
+  Dimensions,
 } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { useLocalSearchParams, router } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
+import { BlurView } from 'expo-blur';
 import { colors } from '@/theme/colors';
 import { Book } from '@/types';
 import { EducationService } from '@/services/educationService';
@@ -127,47 +132,92 @@ export default function BookDetailScene() {
   }
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <TouchableOpacity style={styles.headerBackButton} onPress={() => router.back()}>
-          <Text style={styles.backIcon}>←</Text>
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Detail Buku</Text>
-        <View style={styles.headerSpacer} />
-      </View>
+    <View style={styles.container}>
+      <StatusBar barStyle="light-content" backgroundColor={colors.purple} />
+
+      <LinearGradient
+        colors={[colors.purple, '#6B46C1', colors.lightPurple]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={styles.headerGradient}>
+        <SafeAreaView>
+          <View style={styles.headerContainer}>
+            <BlurView intensity={20} style={styles.backButton}>
+              <TouchableOpacity
+                style={styles.backButtonInner}
+                onPress={() => router.back()}
+                activeOpacity={0.8}>
+                <Ionicons name="arrow-back" size={24} color={colors.white} />
+              </TouchableOpacity>
+            </BlurView>
+
+            <View style={styles.headerContent}>
+              <Text style={styles.headerTitle}>Detail Buku</Text>
+              <Text style={styles.headerSubtitle}>Informasi lengkap buku</Text>
+            </View>
+          </View>
+        </SafeAreaView>
+      </LinearGradient>
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-        <View style={styles.bookHeader}>
-          <View style={styles.coverContainer}>
-            <View style={styles.coverPlaceholder}>
-              <Text style={styles.coverIcon}>📚</Text>
+        <View style={styles.bookCard}>
+          <View style={styles.bookHeader}>
+            <View style={styles.coverContainer}>
+              <LinearGradient
+                colors={['#FF6B6B', '#4ECDC4']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.coverGradient}>
+                <Text style={styles.coverIcon}>📚</Text>
+                {book.isDownloaded && (
+                  <BlurView intensity={90} style={styles.downloadedBadge}>
+                    <View style={styles.downloadedBadgeInner}>
+                      <Ionicons name="checkmark-circle" size={16} color={colors.white} />
+                    </View>
+                  </BlurView>
+                )}
+              </LinearGradient>
             </View>
-            {book.isDownloaded && (
-              <View style={styles.downloadedBadge}>
-                <Text style={styles.downloadedIcon}>✓</Text>
+
+            <View style={styles.bookInfo}>
+              <Text style={styles.title}>{book.title}</Text>
+              <Text style={styles.author}>oleh {book.author}</Text>
+
+              <View style={styles.ratingContainer}>
+                <View style={styles.starsContainer}>{renderStars(book.rating)}</View>
+                <Text style={styles.ratingText}>{book.rating.toFixed(1)}</Text>
               </View>
-            )}
+            </View>
           </View>
 
-          <View style={styles.bookInfo}>
-            <Text style={styles.title}>{book.title}</Text>
-            <Text style={styles.author}>oleh {book.author}</Text>
-
-            <View style={styles.ratingContainer}>
-              <View style={styles.starsContainer}>{renderStars(book.rating)}</View>
-              <Text style={styles.ratingText}>{book.rating.toFixed(1)}</Text>
+          <View style={styles.statsContainer}>
+            <View style={styles.statItem}>
+              <View style={styles.statIconContainer}>
+                <Ionicons name="document-text-outline" size={20} color={colors.purple} />
+              </View>
+              <View style={styles.statTextContainer}>
+                <Text style={styles.statLabel}>Halaman</Text>
+                <Text style={styles.statValue}>{book.pages}</Text>
+              </View>
             </View>
 
-            <View style={styles.metaContainer}>
-              <View style={styles.metaItem}>
-                <Text style={styles.metaIcon}>📄</Text>
-                <Text style={styles.metaText}>{book.pages} halaman</Text>
+            <View style={styles.statItem}>
+              <View style={styles.statIconContainer}>
+                <Ionicons name="download-outline" size={20} color={colors.purple} />
               </View>
-              <View style={styles.metaItem}>
-                <Text style={styles.metaIcon}>⬇️</Text>
-                <Text style={styles.metaText}>
-                  {formatDownloadCount(book.downloadCount)} unduhan
-                </Text>
+              <View style={styles.statTextContainer}>
+                <Text style={styles.statLabel}>Unduhan</Text>
+                <Text style={styles.statValue}>{formatDownloadCount(book.downloadCount)}</Text>
+              </View>
+            </View>
+
+            <View style={styles.statItem}>
+              <View style={styles.statIconContainer}>
+                <Ionicons name="star-outline" size={20} color={colors.purple} />
+              </View>
+              <View style={styles.statTextContainer}>
+                <Text style={styles.statLabel}>Rating</Text>
+                <Text style={styles.statValue}>{book.rating.toFixed(1)}</Text>
               </View>
             </View>
           </View>
@@ -201,19 +251,41 @@ export default function BookDetailScene() {
         )}
       </ScrollView>
 
-      <View style={styles.bottomContainer}>
+      <BlurView intensity={95} style={styles.bottomContainer}>
         <TouchableOpacity
-          style={[styles.downloadButton, book.isDownloaded && styles.downloadedButton]}
+          style={[
+            styles.downloadButton,
+            (book.isDownloaded || isDownloaded) && styles.downloadedButton,
+          ]}
           onPress={handleDownload}
-          disabled={book.isDownloaded}>
-          <Text style={styles.downloadButtonText}>
-            {book.isDownloaded ? '✓ Sudah Diunduh' : '⬇️ Download Buku'}
-          </Text>
+          disabled={book.isDownloaded || isDownloaded}
+          activeOpacity={0.8}>
+          {book.isDownloaded || isDownloaded ? (
+            <LinearGradient
+              colors={['#4CAF50', '#45A049']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+              style={styles.downloadButtonGradient}>
+              <Ionicons name="checkmark-circle" size={24} color={colors.white} />
+              <Text style={styles.downloadButtonText}>Sudah Diunduh</Text>
+            </LinearGradient>
+          ) : (
+            <LinearGradient
+              colors={[colors.purple, colors.lightPurple]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+              style={styles.downloadButtonGradient}>
+              <Ionicons name="download-outline" size={24} color={colors.white} />
+              <Text style={styles.downloadButtonText}>Download Buku</Text>
+            </LinearGradient>
+          )}
         </TouchableOpacity>
-      </View>
-    </SafeAreaView>
+      </BlurView>
+    </View>
   );
 }
+
+const { width: screenWidth } = Dimensions.get('window');
 
 const styles = StyleSheet.create({
   container: {
@@ -252,29 +324,97 @@ const styles = StyleSheet.create({
   headerSpacer: {
     width: 40,
   },
+  headerGradient: {
+    paddingBottom: 30,
+  },
+  headerContainer: {
+    paddingHorizontal: 20,
+    paddingVertical: 20,
+    paddingTop: 50,
+    position: 'relative',
+    alignItems: 'center',
+  },
+  backButton: {
+    position: 'absolute',
+    top: 50,
+    left: 20,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    overflow: 'hidden',
+    zIndex: 10,
+  },
+  backButtonInner: {
+    width: '100%',
+    height: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+  },
+  headerContent: {
+    alignItems: 'center',
+    marginTop: 40,
+  },
+  headerTitle: {
+    fontSize: 24,
+    fontWeight: '800',
+    color: colors.white,
+    marginBottom: 8,
+    letterSpacing: 0.5,
+  },
+  headerSubtitle: {
+    fontSize: 16,
+    color: 'rgba(255, 255, 255, 0.8)',
+    fontWeight: '400',
+  },
   content: {
     flex: 1,
+    marginTop: 20,
+  },
+  bookCard: {
+    backgroundColor: colors.white,
+    marginHorizontal: 20,
+    marginTop: -20,
+    borderRadius: 20,
+    paddingVertical: 24,
+    paddingHorizontal: 20,
+    shadowColor: colors.black,
+    shadowOffset: {
+      width: 0,
+      height: 6,
+    },
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
+    elevation: 8,
   },
   bookHeader: {
     flexDirection: 'row',
-    padding: 20,
-    backgroundColor: colors.white,
-    marginBottom: 16,
+    marginBottom: 24,
   },
   coverContainer: {
-    position: 'relative',
     marginRight: 20,
+    position: 'relative',
   },
-  coverPlaceholder: {
+  coverGradient: {
     width: 100,
     height: 140,
-    borderRadius: 8,
-    backgroundColor: colors.lightGrayPurple,
+    borderRadius: 12,
     justifyContent: 'center',
     alignItems: 'center',
+    shadowColor: colors.black,
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.2,
+    shadowRadius: 6,
+    elevation: 4,
   },
   coverIcon: {
-    fontSize: 40,
+    fontSize: 48,
+    textShadowColor: 'rgba(0, 0, 0, 0.3)',
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 4,
   },
   downloadedBadge: {
     position: 'absolute',

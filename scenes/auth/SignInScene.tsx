@@ -21,12 +21,22 @@ import SocialButton from '@/components/elements/SocialButton';
 import { signIn, clearError } from '@/slices/authSlice';
 import { RootState, AppDispatch } from '@/utils/store';
 import { SignInCredentials } from '@/types/auth';
-import { useExpoGoogleAuth } from '@/hooks/useExpoGoogleAuth';
+import { useEmailAuth } from '@/hooks/useEmailAuth';
+import { useGoogleSignIn } from '@/hooks/useGoogleSignIn';
+
+// web oauth id and secret
+// 292474871516-vtgi44pradraqeo4km9r2hnbqpp4sk9g.apps.googleusercontent.com
+// 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
+// android oauth id
+// 292474871516-prppt054chsnutr515lndd1cg061k1tm.apps.googleusercontent.com
 
 export default function SignInScene() {
   const dispatch = useDispatch<AppDispatch>();
-  const { loading, error } = useSelector((state: RootState) => state.auth);
-  const { signInWithGoogle, loading: googleLoading } = useExpoGoogleAuth();
+  const { loading: reduxLoading, error: reduxError } = useSelector(
+    (state: RootState) => state.auth,
+  );
+  const { signIn: emailSignIn, loading: authLoading, error: authError } = useEmailAuth();
+  const { signInWithGoogle, loading: googleLoading, error: googleError } = useGoogleSignIn();
 
   const [formData, setFormData] = useState<SignInCredentials>({
     email: '',
@@ -60,22 +70,20 @@ export default function SignInScene() {
     dispatch(clearError());
 
     try {
-      await dispatch(signIn(formData)).unwrap();
-      router.replace('/education');
+      // Use our custom hook instead of Redux action
+      await emailSignIn(formData);
+      // Navigation is handled in the hook
     } catch (error) {
-      // Error handled by Redux
+      // Error handled in the hook
     }
   };
 
-  const handleExpoGoogleSignIn = async () => {
-    dispatch(clearError());
-
+  const handleGoogleSignIn = async () => {
     try {
-      console.log('🚀 Starting Expo Google Sign-In...');
       await signInWithGoogle();
+      // Navigation is handled in the hook
     } catch (error) {
-      console.error('❌ Expo Google Sign-In failed:', error);
-      // Error handling is done in the hook
+      // Error handled in the hook
     }
   };
 
@@ -177,7 +185,7 @@ export default function SignInScene() {
             </TouchableOpacity>
 
             {/* Error Message */}
-            {error && (
+            {(reduxError || authError) && (
               <MotiView
                 style={styles.errorContainer}
                 from={{
@@ -193,7 +201,7 @@ export default function SignInScene() {
                   duration: 300,
                 }}>
                 <Ionicons name="alert-circle" size={20} color="#F44336" />
-                <Text style={styles.errorText}>{error}</Text>
+                <Text style={styles.errorText}>{reduxError || authError}</Text>
               </MotiView>
             )}
 
@@ -201,7 +209,7 @@ export default function SignInScene() {
             <Button
               title="Masuk"
               onPress={handleSignIn}
-              loading={loading}
+              loading={reduxLoading || authLoading}
               leftIcon="log-in-outline"
               size="large"
               style={styles.signInButton}
@@ -245,11 +253,7 @@ export default function SignInScene() {
               duration: 600,
               delay: 1000,
             }}>
-            <SocialButton
-              provider="google"
-              onPress={handleExpoGoogleSignIn}
-              loading={googleLoading}
-            />
+            <SocialButton provider="google" onPress={handleGoogleSignIn} loading={googleLoading} />
           </MotiView>
 
           {/* Sign Up Link */}

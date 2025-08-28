@@ -2,6 +2,10 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export enum DataPersistKeys {
   USER = 'USER',
+  AUTO_LOGIN_TIMESTAMP = 'AUTO_LOGIN_TIMESTAMP',
+  AUTO_LOGIN_CREDENTIALS = 'AUTO_LOGIN_CREDENTIALS',
+  LAST_SESSION = 'LAST_SESSION',
+  USER_PREFERENCES = 'USER_PREFERENCES',
   // add more keys here
 }
 

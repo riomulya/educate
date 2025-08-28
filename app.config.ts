@@ -6,6 +6,7 @@ export default ({ config }: ConfigContext): ExpoConfig => {
     ...config,
     slug: process.env.EXPO_SLUG ?? 'educate',
     name: process.env.EXPO_NAME ?? 'Educate',
+    scheme: 'educate', // Important for deep linking
     ios: {
       ...config.ios,
       bundleIdentifier: process.env.EXPO_IOS_BUNDLE_IDENTIFIER ?? 'com.educate.app',
@@ -27,8 +28,17 @@ export default ({ config }: ConfigContext): ExpoConfig => {
       ...config.extra,
       eas: { projectId: expoProjectId },
       env: process.env.ENV ?? 'development',
-      apiUrl: process.env.API_URL ?? 'https://example.com',
-      // add more env variables here...
+      apiUrl: process.env.API_URL ?? 'https://ubexnlxdtdrqbbsxiexi.supabase.co',
+      supabaseKey:
+        process.env.SUPABASE_KEY ??
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InViZXhubHhkdGRycWJic3hpZXhpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzQ0MjI0MzMsImV4cCI6MjA1MDAwMjQzM30.6I4OJjh6KBXRN7dPaB5VhMdC3YLONOKdUZXDHNRFZ9A',
+      webOAuthId:
+        process.env.WEB_OAUTH_ID ??
+        '292474871516-vtgi44pradraqeo4km9r2hnbqpp4sk9g.apps.googleusercontent.com',
+      webOAuthSecret: process.env.WEB_OAUTH_SECRET ?? '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',
+      androidOAuthId:
+        process.env.ANDROID_OAUTH_ID ??
+        '292474871516-prppt054chsnutr515lndd1cg061k1tm.apps.googleusercontent.com',
     },
     plugins: [
       'expo-router',
@@ -59,6 +69,9 @@ export default ({ config }: ConfigContext): ExpoConfig => {
         },
       ],
     ],
+    experiments: {
+      typedRoutes: true,
+    },
   };
   // console.log('[##] expo config', expoConfig);
   return expoConfig;

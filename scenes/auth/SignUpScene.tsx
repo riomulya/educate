@@ -21,12 +21,12 @@ import SocialButton from '@/components/elements/SocialButton';
 import { signUp, clearError } from '@/slices/authSlice';
 import { RootState, AppDispatch } from '@/utils/store';
 import { SignUpCredentials } from '@/types/auth';
-import { useExpoGoogleAuth } from '@/hooks/useExpoGoogleAuth';
+import { useEmailAuth } from '@/hooks/useEmailAuth';
 
 export default function SignUpScene() {
   const dispatch = useDispatch<AppDispatch>();
-  const { loading, error } = useSelector((state: RootState) => state.auth);
-  const { signInWithGoogle, loading: googleLoading } = useExpoGoogleAuth();
+  const { loading: reduxLoading, error: reduxError } = useSelector((state: RootState) => state.auth);
+  const { signUp: emailSignUp, loading: authLoading, error: authError } = useEmailAuth();
 
   const [formData, setFormData] = useState<SignUpCredentials>({
     email: '',
@@ -76,28 +76,17 @@ export default function SignUpScene() {
     dispatch(clearError());
 
     try {
-      await dispatch(signUp(formData)).unwrap();
-      Alert.alert('Berhasil!', 'Akun berhasil dibuat. Silakan cek email Anda untuk verifikasi.', [
-        {
-          text: 'OK',
-          onPress: () => router.replace('/auth/sign-in'),
-        },
-      ]);
+      // Use our custom hook instead of Redux action
+      await emailSignUp(formData);
+      // Alert and navigation are handled in the hook
     } catch (error) {
-      // Error handled by Redux
+      // Error handled in the hook
     }
   };
 
-  const handleExpoGoogleSignIn = async () => {
-    dispatch(clearError());
-
-    try {
-      console.log('🚀 Starting Expo Google Sign-In...');
-      await signInWithGoogle();
-    } catch (error) {
-      console.error('❌ Expo Google Sign-In failed:', error);
-      // Error handling is done in the hook
-    }
+  const handleEmailOnlySignUp = async () => {
+    // Just use the regular sign up button - no separate oauth for now
+    Alert.alert('Email Sign Up', 'Gunakan form pendaftaran di atas untuk mendaftar dengan email dan password.');
   };
 
   const handleInputChange = (field: keyof SignUpCredentials, value: string) => {
@@ -218,7 +207,7 @@ export default function SignUpScene() {
             />
 
             {/* Error Message */}
-            {error && (
+            {(reduxError || authError) && (
               <MotiView
                 style={styles.errorContainer}
                 from={{
@@ -234,7 +223,7 @@ export default function SignUpScene() {
                   duration: 300,
                 }}>
                 <Ionicons name="alert-circle" size={20} color="#F44336" />
-                <Text style={styles.errorText}>{error}</Text>
+                <Text style={styles.errorText}>{reduxError || authError}</Text>
               </MotiView>
             )}
 
@@ -263,7 +252,7 @@ export default function SignUpScene() {
             <Button
               title="Daftar"
               onPress={handleSignUp}
-              loading={loading}
+              loading={reduxLoading || authLoading}
               leftIcon="person-add-outline"
               size="large"
               style={styles.signUpButton}
@@ -309,8 +298,8 @@ export default function SignUpScene() {
             }}>
             <SocialButton
               provider="google"
-              onPress={handleExpoGoogleSignIn}
-              loading={googleLoading}
+              onPress={handleEmailOnlySignUp}
+              loading={false}
             />
           </MotiView>
 

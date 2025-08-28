@@ -33,10 +33,13 @@ export default {
         process.env.SUPABASE_KEY ||
         'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InViZXhubHhkdGRycWJic3hpZXhpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzQ0MjI0MzMsImV4cCI6MjA1MDAwMjQzM30.6I4OJjh6KBXRN7dPaB5VhMdC3YLONOKdUZXDHNRFZ9A',
       // Google OAuth Credentials
-      webOAuthId: process.env.WEB_OAUTH_ID || 'your-web-client-id.googleusercontent.com',
-      webOAuthSecret: process.env.WEB_OAUTH_SECRET || 'your-web-client-secret',
+      webOAuthId:
+        process.env.WEB_OAUTH_ID ||
+        '292474871516-vtgi44pradraqeo4km9r2hnbqpp4sk9g.apps.googleusercontent.com',
+      webOAuthSecret: process.env.WEB_OAUTH_SECRET || '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',
       androidOAuthId:
-        process.env.ANDROID_OAUTH_ID || 'your-android-client-id.googleusercontent.com',
+        process.env.ANDROID_OAUTH_ID ||
+        '292474871516-prppt054chsnutr515lndd1cg061k1tm.apps.googleusercontent.com',
       eas: {
         projectId: 'your-project-id-here',
       },

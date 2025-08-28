@@ -15,12 +15,14 @@ import { colors } from '@/theme/colors';
 import { Quiz, Question, QuizAnswer } from '@/types';
 import { EducationService } from '@/services/educationService';
 import { submitQuizAnswers } from '@/slices/educationSlice';
+import { useCompletionStatus } from '@/hooks/useCompletionStatus';
 import { RootState, AppDispatch } from '@/utils/store';
 
 export default function QuizScene() {
   const dispatch = useDispatch<AppDispatch>();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { selectedQuiz } = useSelector((state: RootState) => state.education);
+  const { isQuizCompleted, markQuizCompleted, getQuizScore } = useCompletionStatus();
 
   const [quiz, setQuiz] = useState<Quiz | null>(selectedQuiz);
   const [loading, setLoading] = useState(false);
@@ -32,6 +34,8 @@ export default function QuizScene() {
   const [quizCompleted, setQuizCompleted] = useState(false);
   const [quizResult, setQuizResult] = useState<any>(null);
   const [questionStartTime, setQuestionStartTime] = useState(Date.now());
+  const [isAlreadyCompleted, setIsAlreadyCompleted] = useState(false);
+  const [previousScore, setPreviousScore] = useState<number | null>(null);
 
   useEffect(() => {
     if (id && !selectedQuiz) {
@@ -41,6 +45,16 @@ export default function QuizScene() {
       setTimeRemaining(selectedQuiz.timeLimit * 60); // Convert minutes to seconds
     }
   }, [id, selectedQuiz]);
+
+  useEffect(() => {
+    if (quiz?.id) {
+      const completed = isQuizCompleted(quiz.id);
+      setIsAlreadyCompleted(completed);
+      if (completed) {
+        setPreviousScore(getQuizScore(quiz.id));
+      }
+    }
+  }, [quiz?.id, isQuizCompleted, getQuizScore]);
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
@@ -129,7 +143,14 @@ export default function QuizScene() {
 
       setQuizResult(result);
       setQuizCompleted(true);
+
+      // Mark quiz as completed in AsyncStorage
+      if (result?.score !== undefined) {
+        await markQuizCompleted(quiz.id, result.score);
+        console.log(`✅ Quiz ${quiz.id} completed with score: ${result.score}%`);
+      }
     } catch (error) {
+      console.error('Error finishing quiz:', error);
       Alert.alert('Error', 'Gagal menyimpan hasil quiz');
     } finally {
       setLoading(false);
@@ -311,6 +332,28 @@ export default function QuizScene() {
             <Text style={styles.quizTitle}>{quiz.title}</Text>
             <Text style={styles.quizDescription}>{quiz.description}</Text>
 
+            {isAlreadyCompleted && previousScore !== null && (
+              <View style={styles.completionCard}>
+                <Text style={styles.completionIcon}>✅</Text>
+                <Text style={styles.completionTitle}>Quiz Sudah Diselesaikan</Text>
+                <Text style={styles.completionDescription}>
+                  Anda sudah menyelesaikan quiz ini dengan skor {previousScore}%
+                </Text>
+                <View style={styles.completionScore}>
+                  <Text
+                    style={[
+                      styles.completionScoreValue,
+                      { color: previousScore >= quiz.passingScore ? '#4CAF50' : '#F44336' },
+                    ]}>
+                    {previousScore}%
+                  </Text>
+                  <Text style={styles.completionScoreLabel}>
+                    {previousScore >= quiz.passingScore ? 'LULUS' : 'BELUM LULUS'}
+                  </Text>
+                </View>
+              </View>
+            )}
+
             <View style={styles.quizMeta}>
               <View style={styles.metaRow}>
                 <Text style={styles.metaIcon}>❓</Text>
@@ -348,7 +391,9 @@ export default function QuizScene() {
             </View>
 
             <TouchableOpacity style={styles.startButton} onPress={startQuiz}>
-              <Text style={styles.startButtonText}>Mulai Quiz</Text>
+              <Text style={styles.startButtonText}>
+                {isAlreadyCompleted ? 'Ulangi Quiz' : 'Mulai Quiz'}
+              </Text>
             </TouchableOpacity>
           </View>
         </ScrollView>
@@ -424,6 +469,53 @@ const styles = StyleSheet.create({
     lineHeight: 24,
     marginBottom: 24,
     textAlign: 'center',
+  },
+  completionCard: {
+    backgroundColor: colors.white,
+    borderRadius: 12,
+    padding: 20,
+    marginTop: 20,
+    marginBottom: 20,
+    alignItems: 'center',
+    shadowColor: colors.black,
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  completionIcon: {
+    fontSize: 48,
+    marginBottom: 12,
+  },
+  completionTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: colors.blackGray,
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  completionDescription: {
+    fontSize: 14,
+    color: colors.gray,
+    textAlign: 'center',
+    marginBottom: 16,
+    lineHeight: 20,
+  },
+  completionScore: {
+    alignItems: 'center',
+  },
+  completionScoreValue: {
+    fontSize: 32,
+    fontWeight: 'bold',
+    marginBottom: 4,
+  },
+  completionScoreLabel: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: colors.gray,
   },
   quizMeta: {
     marginBottom: 24,
